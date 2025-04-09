@@ -37,6 +37,34 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     List<Category> favorites;
 
+    @ManyToMany
+    @JoinTable(
+            name = "liked_sport_news",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "news_id"))
+    List<SportNews> likedSportNews;
+
+    @ManyToMany
+    @JoinTable(
+            name = "liked_cultural_news",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "news_id"))
+    List<CulturalNews> likedCulturalNews;
+
+    @ManyToMany
+    @JoinTable(
+            name = "liked_technology_news",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "news_id"))
+    List<TechnologyNews> likedTechnologyNews;
+
+    @ManyToMany
+    @JoinTable(
+            name = "liked_sport_news",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "news_id"))
+    List<EntertainmentNews> likedEntertainmentNews;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

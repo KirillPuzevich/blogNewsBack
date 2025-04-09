@@ -5,6 +5,7 @@ import com.software.blognews.dto.EntertainmentNewsResponse;
 import com.software.blognews.dto.NewsListResponse;
 import com.software.blognews.models.Category;
 import com.software.blognews.models.EntertainmentNews;
+import com.software.blognews.models.User;
 import com.software.blognews.repositories.CategoryRepository;
 import com.software.blognews.repositories.EntertainmentNewsRepository;
 import org.modelmapper.ModelMapper;
@@ -22,10 +23,13 @@ public class EntertainmentNewsService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
 
-    public EntertainmentNewsService(EntertainmentNewsRepository entertainmentNewsRepository, CategoryRepository categoryRepository, ModelMapper modelMapper) {
+    private final UserService userService;
+
+    public EntertainmentNewsService(EntertainmentNewsRepository entertainmentNewsRepository, CategoryRepository categoryRepository, ModelMapper modelMapper, UserService userService) {
         this.entertainmentNewsRepository = entertainmentNewsRepository;
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
+        this.userService = userService;
     }
 
     public EntertainmentNewsResponse addEntertainmentNews(EntertainmentNewsRequest entertainmentNewsRequest) {
@@ -84,7 +88,12 @@ public class EntertainmentNewsService {
     }
 
     public Optional<EntertainmentNewsResponse> findById(Long id) {
+        User currentUser = userService.getCurrentUser();
         Optional<EntertainmentNews> entertainmentNews = entertainmentNewsRepository.findById(id);
-        return entertainmentNews.map(news -> modelMapper.map(news, EntertainmentNewsResponse.class));
+        EntertainmentNewsResponse entertainmentNewsResponse = entertainmentNews.map(news -> modelMapper.map(news, EntertainmentNewsResponse.class)).get();
+        if (entertainmentNews.get().getUsers().contains(currentUser)) {
+            entertainmentNewsResponse.setLiked(true);
+        }
+        return Optional.of(entertainmentNewsResponse);
     }
 }

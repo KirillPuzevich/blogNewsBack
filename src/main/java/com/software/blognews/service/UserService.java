@@ -2,10 +2,8 @@ package com.software.blognews.service;
 
 import com.software.blognews.dto.CategoryResponse;
 import com.software.blognews.dto.UserResponse;
-import com.software.blognews.models.Category;
-import com.software.blognews.models.User;
-import com.software.blognews.repositories.CategoryRepository;
-import com.software.blognews.repositories.UserRepository;
+import com.software.blognews.models.*;
+import com.software.blognews.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -22,6 +20,10 @@ import java.util.List;
 public class UserService {
     private final UserRepository repository;
     private final CategoryRepository categoryRepository;
+    private final SportNewsRepository sportNewsRepository;
+    private final CulturalNewsRepository culturalNewsRepository;
+    private final TechnologyNewsRepository technologyNewsRepository;
+    private final EntertainmentNewsRepository entertainmentNewsRepository;
     private final ModelMapper modelMapper;
 
     /**
@@ -107,6 +109,61 @@ public class UserService {
         }
 
         categoryRepository.save(newCategory);
+        repository.save(currentUser);
+    }
+
+    public void updateLikedNews(Long categoryId, Long newsId) {
+        User currentUser = getCurrentUser();
+        switch (categoryId.intValue()) {
+            case 1 -> {
+                SportNews sportNews = sportNewsRepository.findById(newsId).get();
+                List<SportNews> likedSportNews = currentUser.getLikedSportNews();
+                if (likedSportNews.contains(sportNews)) {
+                    currentUser.getLikedSportNews().remove(sportNews);
+                    sportNews.getUsers().remove(currentUser);
+                } else {
+                    currentUser.getLikedSportNews().add(sportNews);
+                    sportNews.getUsers().add(currentUser);
+                }
+                sportNewsRepository.save(sportNews);
+            }
+            case 2 -> {
+                CulturalNews culturalNews = culturalNewsRepository.findById(newsId).get();
+                List<CulturalNews> likedCulturalNews = currentUser.getLikedCulturalNews();
+                if (likedCulturalNews.contains(culturalNews)) {
+                    currentUser.getLikedSportNews().remove(culturalNews);
+                    culturalNews.getUsers().remove(currentUser);
+                } else {
+                    currentUser.getLikedCulturalNews().add(culturalNews);
+                    culturalNews.getUsers().add(currentUser);
+                }
+                culturalNewsRepository.save(culturalNews);
+            }
+            case 3 -> {
+                TechnologyNews technologyNews = technologyNewsRepository.findById(newsId).get();
+                List<TechnologyNews> likedTechnologyNews = currentUser.getLikedTechnologyNews();
+                if (likedTechnologyNews.contains(technologyNews)) {
+                    currentUser.getLikedTechnologyNews().remove(technologyNews);
+                    technologyNews.getUsers().remove(currentUser);
+                } else {
+                    currentUser.getLikedTechnologyNews().add(technologyNews);
+                    technologyNews.getUsers().add(currentUser);
+                }
+                technologyNewsRepository.save(technologyNews);
+            }
+            case 4 -> {
+                EntertainmentNews entertainmentNews = entertainmentNewsRepository.findById(newsId).get();
+                List<EntertainmentNews> likedEntertainmentNews = currentUser.getLikedEntertainmentNews();
+                if (likedEntertainmentNews.contains(entertainmentNews)) {
+                    currentUser.getLikedSportNews().remove(entertainmentNews);
+                    entertainmentNews.getUsers().remove(currentUser);
+                } else {
+                    currentUser.getLikedEntertainmentNews().add(entertainmentNews);
+                    entertainmentNews.getUsers().add(currentUser);
+                }
+                entertainmentNewsRepository.save(entertainmentNews);
+            }
+        }
         repository.save(currentUser);
     }
 

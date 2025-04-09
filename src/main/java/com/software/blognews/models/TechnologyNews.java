@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "technology_news")
@@ -33,8 +34,10 @@ public class TechnologyNews {
         publishedAt = LocalDateTime.now(); // Установка текущей даты
     }
 
-
     @ManyToOne
     @JoinColumn(name = "category_id")
     Category category;
+
+    @ManyToMany(mappedBy = "likedTechnologyNews")
+    private List<User> users;
 }

@@ -1,6 +1,7 @@
 package com.software.blognews.controllers;
 
 import com.software.blognews.dto.UpdateFavoritesRequest;
+import com.software.blognews.dto.UpdateLikedNewsRequest;
 import com.software.blognews.dto.UserResponse;
 import com.software.blognews.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,5 +23,10 @@ public class UserController {
     @PostMapping("/favorites")
     public void updateFavorites(@RequestBody UpdateFavoritesRequest request) {
         userService.updateFavorites(request.getCategoryId());
+    }
+
+    @PostMapping("/likedNews")
+    public void update(@RequestBody UpdateLikedNewsRequest request) {
+        userService.updateLikedNews(request.getCategoryId(), request.getNewsId());
     }
 }

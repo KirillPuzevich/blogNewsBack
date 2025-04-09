@@ -5,6 +5,7 @@ import com.software.blognews.dto.CulturalNewsResponse;
 import com.software.blognews.dto.NewsListResponse;
 import com.software.blognews.models.Category;
 import com.software.blognews.models.CulturalNews;
+import com.software.blognews.models.User;
 import com.software.blognews.repositories.CategoryRepository;
 import com.software.blognews.repositories.CulturalNewsRepository;
 import org.modelmapper.ModelMapper;
@@ -21,11 +22,13 @@ public class CulturalNewsService {
     private final CulturalNewsRepository culturalNewsRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
+     private final UserService userService;
 
-    public CulturalNewsService(CulturalNewsRepository culturalNewsRepository, CategoryRepository categoryRepository, ModelMapper modelMapper) {
+    public CulturalNewsService(CulturalNewsRepository culturalNewsRepository, CategoryRepository categoryRepository, ModelMapper modelMapper, UserService userService) {
         this.culturalNewsRepository = culturalNewsRepository;
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
+        this.userService = userService;
     }
 
     public CulturalNewsResponse addCulturalNews(CulturalNewsRequest culturalNewsRequest) {
@@ -82,7 +85,12 @@ public class CulturalNewsService {
 
 
     public Optional<CulturalNewsResponse> findById(Long id) {
+        User currentUser = userService.getCurrentUser();
         Optional<CulturalNews> culturalNews = culturalNewsRepository.findById(id);
-        return culturalNews.map(news -> modelMapper.map(news, CulturalNewsResponse.class));
+        CulturalNewsResponse culturalNewsResponse = culturalNews.map(news -> modelMapper.map(news, CulturalNewsResponse.class)).get();
+        if (culturalNews.get().getUsers().contains(currentUser)) {
+            culturalNewsResponse.setLiked(true);
+        }
+        return Optional.of(culturalNewsResponse);
     }
 }

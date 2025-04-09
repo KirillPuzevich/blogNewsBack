@@ -1,10 +1,13 @@
 package com.software.blognews.service;
 
+import com.software.blognews.dto.EntertainmentNewsResponse;
 import com.software.blognews.dto.SportNewsRequest;
 import com.software.blognews.dto.SportNewsResponse;
 import com.software.blognews.dto.NewsListResponse; // Import the NewsListResponse
 import com.software.blognews.models.Category;
+import com.software.blognews.models.EntertainmentNews;
 import com.software.blognews.models.SportNews;
+import com.software.blognews.models.User;
 import com.software.blognews.repositories.CategoryRepository;
 import com.software.blognews.repositories.SportNewsRepository;
 import org.modelmapper.ModelMapper;
@@ -21,11 +24,13 @@ public class SportNewsService {
     private final SportNewsRepository sportNewsRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
+    private final UserService userService;
 
-    public SportNewsService(SportNewsRepository sportNewsRepository, CategoryRepository categoryRepository, ModelMapper modelMapper) {
+    public SportNewsService(SportNewsRepository sportNewsRepository, CategoryRepository categoryRepository, ModelMapper modelMapper, UserService userService) {
         this.sportNewsRepository = sportNewsRepository;
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
+        this.userService = userService;
     }
 
     public SportNewsResponse addSportNews(SportNewsRequest sportNewsRequest) {
@@ -75,14 +80,28 @@ public class SportNewsService {
                 .collect(Collectors.toList());
 
         List<SportNewsResponse> resultList = paginatedNewsList.stream()
-                .map(news -> modelMapper.map(news, SportNewsResponse.class))
+                .map(this::mapToSportNewsResponse)
                 .collect(Collectors.toList());
 
         return new NewsListResponse(totalSize, resultList);
     }
 
     public Optional<SportNewsResponse> findById(Long id) {
+        User currentUser = userService.getCurrentUser();
         Optional<SportNews> sportNews = sportNewsRepository.findById(id);
-        return sportNews.map(news -> modelMapper.map(news, SportNewsResponse.class));
+        SportNewsResponse sportNewsResponse = sportNews.map(news -> modelMapper.map(news, SportNewsResponse.class)).get();
+        if (sportNews.get().getUsers().contains(currentUser)) {
+            sportNewsResponse.setLiked(true);
+        }
+        return Optional.of(sportNewsResponse);
+    }
+
+    public SportNewsResponse mapToSportNewsResponse(SportNews sportNews) {
+        User currentUser = userService.getCurrentUser();
+        SportNewsResponse response = modelMapper.map(sportNews, SportNewsResponse.class);
+        if (sportNews.getUsers().contains(currentUser)) {
+            response.setLiked(true);
+        }
+        return response;
     }
 }

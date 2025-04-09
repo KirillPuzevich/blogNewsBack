@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "entertainment_news")
@@ -37,4 +38,7 @@ public class EntertainmentNews {
     @ManyToOne
     @JoinColumn(name = "category_id")
     Category category;
+
+    @ManyToMany(mappedBy = "likedEntertainmentNews")
+    private List<User> users;
 }

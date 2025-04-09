@@ -1,10 +1,11 @@
 package com.software.blognews.service;
 
+import com.software.blognews.dto.NewsListResponse;
 import com.software.blognews.dto.TechnologyNewsRequest;
 import com.software.blognews.dto.TechnologyNewsResponse;
-import com.software.blognews.dto.NewsListResponse;
 import com.software.blognews.models.Category;
 import com.software.blognews.models.TechnologyNews;
+import com.software.blognews.models.User;
 import com.software.blognews.repositories.CategoryRepository;
 import com.software.blognews.repositories.TechnologyNewsRepository;
 import org.modelmapper.ModelMapper;
@@ -21,11 +22,13 @@ public class TechnologyNewsService {
     private final TechnologyNewsRepository technologyNewsRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
+    private final UserService userService;
 
-    public TechnologyNewsService(TechnologyNewsRepository technologyNewsRepository, CategoryRepository categoryRepository, ModelMapper modelMapper) {
+    public TechnologyNewsService(TechnologyNewsRepository technologyNewsRepository, CategoryRepository categoryRepository, ModelMapper modelMapper, UserService userService) {
         this.technologyNewsRepository = technologyNewsRepository;
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
+        this.userService = userService;
     }
 
     public TechnologyNewsResponse addTechnologyNews(TechnologyNewsRequest technologyNewsRequest) {
@@ -84,7 +87,12 @@ public class TechnologyNewsService {
     }
 
     public Optional<TechnologyNewsResponse> findById(Long id) {
+        User currentUser = userService.getCurrentUser();
         Optional<TechnologyNews> technologyNews = technologyNewsRepository.findById(id);
-        return technologyNews.map(news -> modelMapper.map(news, TechnologyNewsResponse.class));
+        TechnologyNewsResponse technologyNewsResponse = technologyNews.map(news -> modelMapper.map(news, TechnologyNewsResponse.class)).get();
+        if (technologyNews.get().getUsers().contains(currentUser)) {
+            technologyNewsResponse.setLiked(true);
+        }
+        return Optional.of(technologyNewsResponse);
     }
 }

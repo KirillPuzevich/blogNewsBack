@@ -17,4 +17,5 @@ public class SportNewsResponse {
     private String summary;
     private LocalDateTime publishedAt;
     private CategoryResponse category;
+    private boolean liked;
 }
